@@ -101,7 +101,7 @@ These samples illustrate the core logic used inside Airflow DAG tasks.
 ## 5. Data Model & Schema Design
 
 Located in:  
-➡ `Architecture_and_design/`
+`Architecture_and_design/`
 
 Includes:
 
