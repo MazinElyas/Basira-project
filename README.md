@@ -1,84 +1,161 @@
 
-# Document Intelligence Pipeline - Implementation Sample
+# Document Intelligence Pipeline (GCP)
 
-This folder contains a simplified, self-contained implementation sample that demonstrates
-the core logic of the OCR routing and logging flow described in the technical assessment.
+A scalable, secure, and cost-efficient **Document Intelligence Pipeline** built on **Google Cloud Platform (GCP)**.  
+Designed for processing high-volume documents such as bank statements, invoices, ID cards, and commercial registrations.
 
-It is **not meant to run against real GCP services**.
-Instead, it illustrates how the pipeline components would be structured in code.
+This repository contains:
+
+- **Architecture & Design** (diagrams, ERD, lineage)  
+- **Technical Write-Up**  
+- **Implementation Sample**  
+- **Presentation**  
+- **Data Models & Metadata Structures**
 
 ---
 
-## Folder Structure
+## 1. Project Overview
+
+Enterprises ingest thousands of documents per day.  
+This pipeline extracts, structures, validates, and analyzes document content using a cloud-native design.
+
+### **Core Capabilities**
+- Multi-type document ingestion  
+- Cost-aware OCR (Tesseract + GCP Document AI)  
+- Metadata-driven extraction (YAML)  
+- BigQuery-based base & analytics layers  
+- Full lineage, logging, and auditability  
+- Feature generation for ML & analytics  
+
+---
+
+## 2. Architecture Summary
+
+The system is composed of an **ingestion layer** and **three Airflow DAGs** sitting on top of GCP services:
+
+### Ingestion layer
+- Write raw documents to Cloud Storage.
+- Publish messages to Pub/Sub topics.
+
+### **DAG 1 — OCR Pipeline**
+- Pulls messages from Pub/Sub  
+- Chooses OCR engine  
+- Extracts text and stores JSON in GCS  
+- Logs to BigQuery  
+
+### **DAG 2 — Base Layer ETL**
+- Parses OCR JSON  
+- Uses YAML metadata to structure data  
+- Loads base tables into BigQuery  
+- Runs DQ checks  
+
+### **DAG 3 — Analytics & Features**
+- Builds fact & summary tables  
+- Generates customer-level features  
+- Produces business-ready datasets  
+
+Architecture diagrams & lineage visuals are available in:  
+`/Architecture_and_design/`
+
+---
+
+## 3. Repository Structure
 
 ```
-implementation_sample/
+.
+├── Architecture_and_design/
+│   ├── architecture_overview.md
+|   ├── Architecture diagram.png
+|   ├── erd_bank_statements.png
+│   ├── erd_fact_customers.png
+│   ├── erd_dim_document.png
+│   ├── erd_ocr_logs.png
+│   └── customer_data_lineage.png
 │
-├── main.py (stub)
-├── functions.py (stub)
-├── engines.py (stub)
+├── stub_codebase/
+│   ├── main.py
+│   ├── engines.py
+│   └── functions.py
+│
+├── Basira presentation.pdf
+│
+├── writeup.md
+│
 └── README.md
 ```
 
 ---
 
-## Module Descriptions
+## 4. Implementation Sample
 
-### **main.py**
-Simulates a single batch run of the OCR pipeline:
+A minimal, modular Python code sample demonstrating the OCR pipeline logic:
 
-- Pulls messages (representing Pub/Sub messages)
-- Routes each message based on complexity heuristics
-- Calls the appropriate OCR engine
-- Logs results into BigQuery (or prints them in mock mode)
+- **`main.py`** – batch pipeline runner  
+- **`functions.py`** – Pub/Sub simulation, routing, logging  
+- **`engines.py`** – Tesseract & GCP OCR mock engines  
 
-In the real system, this logic would live inside the **Airflow OCR DAG**.
+These samples illustrate the core logic used inside Airflow DAG tasks.
 
 ---
 
-### **functions.py**
-Holds the core pipeline logic:
+## 5. Data Model & Schema Design
 
-- `pull_messages()`  
-  Simulates pulling Pub/Sub messages.
+Located in:  
+➡ `Architecture_and_design/`
 
-- `route_ocr()`  
-  Performs complexity routing (Tesseract vs GCP OCR) and assembles the OCR record.
+Includes:
 
-- `write_ocr_log()`  
-  Writes OCR logs into a **BigQuery table (`logging.OCR_logs`)**.
-
-This is where orchestration logic is centralized.
-
----
-
-### **engines.py**
-Contains the OCR engine wrappers:
-
-- `run_tesseract()` – simulates open-source OCR extraction  
-- `run_gcp_ocr()` – simulates GCP OCR extraction (Vision / Document AI)
-
-Real OCR client imports are included but commented out.
-
-This module demonstrates how engine-specific code is organized and abstracted.
+- Base layer schemas  
+- Analytical fact tables  
+- Dimension tables (SCD Type 2)  
+- Logging tables  
+- DQ result schema  
+- Lineage diagram  
 
 ---
 
-## Mapping to the Architecture
+## 6. Presentation
 
-This sample represents the following part of the architecture:
+The final PDF is included:  
+**Basira presentation.pdf**
 
-```
-Pub/Sub consumption → OCR Engines → BigQuery Logs
-```
+Contains:
 
-The sample focuses on:
+- Architecture summary  
+- OCR flow  
+- ETL flow  
+- Governance model  
+- Customer-level analytics model  
+- Q&A slide  
 
-- Pub/Sub batch consumption simulation  
-- OCR routing logic  
-- Logging to BigQuery  
-- Clear modular structure  
+---
 
-It does **not** include Airflow DAG code, Cloud Run API code, or actual GCP deployments.
+## 7. Key Features
+
+### Metadata-Driven  
+YAML files define extraction logic, enabling rapid onboarding of new document types.
+
+### Cost Awareness  
+Tesseract vs. GCP OCR decision logic helps optimize processing cost.
+
+### Strong Governance  
+Policy tags, lineage fields, IAM and VPC-SC ensure secure handling of sensitive data.
+
+### Clean Separation of Concerns  
+Distinct DAGs for OCR, ETL, and Analytics increase clarity & maintainability.
+
+### End-to-End Observability  
+BigQuery-based logs capture performance, errors, and workflow-level metadata.
+
+---
+
+## 8. Future Extensions
+
+- Add new document types with minimal engineering effort  
+- Add ML-driven OCR routing model  
+- Support near-real-time ingestion (Cloud Run + Pub/Sub Push)  
+- Expand customer-level features for ML models
+- Integrate apache spark engine for processing efficiency.
+- Build & integrate AI agents to interact with the open-source OCR and enhance it.  
 
 ---
